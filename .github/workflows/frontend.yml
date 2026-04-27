@@ -7,8 +7,11 @@ on:
       - 'frontend/**'
       - '.github/workflows/frontend.yml'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  build-test-scan:
+  build-test:
     runs-on: ubuntu-latest
 
     defaults:
@@ -17,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
@@ -41,13 +44,28 @@ jobs:
         run: tar -czf frontend-dist.tar.gz dist
 
       - name: Upload Frontend Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-dist
           path: frontend/frontend-dist.tar.gz
 
-      - name: SonarQube Scan
+  sonar-scan:
+    needs: build-test
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Run SonarQube Scan
+        working-directory: frontend
         run: |
+          npm ci
           npx sonar-scanner \
             -Dsonar.projectKey=frontend \
             -Dsonar.sources=src \
@@ -55,21 +73,18 @@ jobs:
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
   deploy:
-    needs: build-test-scan
+    needs: [build-test, sonar-scan]
     runs-on: self-hosted
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: frontend-dist
           path: /home/azureuser/artifacts/frontend
-
-      - name: Rename Artifact
-        run: mv /home/azureuser/artifacts/frontend/frontend-dist.tar.gz /home/azureuser/artifacts/frontend/frontend-dist.tar.gz || true
 
       - name: Deploy Frontend with Ansible
         run: |
@@ -81,4 +96,3 @@ jobs:
 
       - name: Validate Through App Gateway
         run: curl -I http://20.205.212.128/
-
