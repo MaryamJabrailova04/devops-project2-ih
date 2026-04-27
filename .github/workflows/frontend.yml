@@ -1,0 +1,84 @@
+name: Frontend CI-CD
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+
+jobs:
+  build-test-scan:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm run test -- --run
+
+      - name: Build Frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
+      - name: Archive Frontend Build
+        run: tar -czf frontend-dist.tar.gz dist
+
+      - name: Upload Frontend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/frontend-dist.tar.gz
+
+      - name: SonarQube Scan
+        run: |
+          npx sonar-scanner \
+            -Dsonar.projectKey=frontend \
+            -Dsonar.sources=src \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+  deploy:
+    needs: build-test-scan
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: /home/azureuser/artifacts/frontend
+
+      - name: Rename Artifact
+        run: mv /home/azureuser/artifacts/frontend/frontend-dist.tar.gz /home/azureuser/artifacts/frontend/frontend-dist.tar.gz || true
+
+      - name: Deploy Frontend with Ansible
+        run: |
+          cd /home/azureuser/config/ansible
+          ansible-playbook playbooks/frontend.yml
+
+      - name: Validate Frontend Direct
+        run: curl -I http://10.20.2.4/
+
+      - name: Validate Through App Gateway
+        run: curl -I http://20.205.212.128/
+
