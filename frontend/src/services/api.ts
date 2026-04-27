@@ -1,7 +1,21 @@
 import axios from 'axios';
 import type { Ingredient, CartItem, Order, IngredientsResponse, IngredientCategory } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const normalizeApiBaseUrl = (value?: string): string => {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      return window.location.origin;
+    }
+
+    return 'http://localhost:8080';
+  }
+
+  return trimmed.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+};
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 // Debug: Log the API URL to help with troubleshooting
 console.log('API_BASE_URL:', API_BASE_URL);
