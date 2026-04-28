@@ -1,0 +1,29 @@
+- name: Remove default nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Copy frontend build
+  copy:
+    src: "{{ frontend_dist_path }}"
+    dest: /var/www/html/
+    mode: '0755'
+
+- name: Configure nginx
+  template:
+    src: nginx-frontend.conf.j2
+    dest: /etc/nginx/sites-available/frontend
+    mode: '0644'
+
+- name: Enable frontend site
+  file:
+    src: /etc/nginx/sites-available/frontend
+    dest: /etc/nginx/sites-enabled/frontend
+    state: link
+
+- name: Restart nginx
+  systemd:
+    name: nginx
+    enabled: yes
+    state: restarted
+

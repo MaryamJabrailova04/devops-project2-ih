@@ -1,0 +1,15 @@
+[Unit]
+Description=Burger Builder Backend
+After=network.target
+
+[Service]
+User=root
+EnvironmentFile=/opt/backend/backend.env
+ExecStart=/usr/bin/java -jar /opt/backend/app.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

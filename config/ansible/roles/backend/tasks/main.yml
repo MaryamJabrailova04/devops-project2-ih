@@ -1,0 +1,34 @@
+- name: Create backend app directory
+  file:
+    path: /opt/backend
+    state: directory
+    mode: '0755'
+
+- name: Copy backend jar
+  copy:
+    src: "{{ backend_jar_path }}"
+    dest: /opt/backend/app.jar
+    mode: '0755'
+
+- name: Create backend env file
+  template:
+    src: backend.env.j2
+    dest: /opt/backend/backend.env
+    mode: '0600'
+
+- name: Create backend systemd service
+  template:
+    src: backend.service.j2
+    dest: /etc/systemd/system/burger-backend.service
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable backend service
+  systemd:
+    name: burger-backend
+    enabled: yes
+    state: restarted
+
