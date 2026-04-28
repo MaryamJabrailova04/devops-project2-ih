@@ -70,7 +70,7 @@ jobs:
           ansible-playbook playbooks/backend.yml
 
       - name: Validate Backend Direct
-        run: curl http://10.20.3.4:8080/api/health
+        run: curl http://20.205.212.128/api/health
 
       - name: Validate Through App Gateway
         run: curl http://20.205.212.128/api/orders/history
