@@ -62,11 +62,7 @@ jobs:
           name: backend-jar
           path: /home/azureuser/artifacts/backend
 
-      - name: Rename JAR
-        run: |
-          cd /home/azureuser/artifacts/backend
-          JAR_FILE=$(ls *.jar | head -n 1)
-          cp "$JAR_FILE" backend.jar
+      
 
       - name: Deploy Backend with Ansible
         run: |
