@@ -82,10 +82,3 @@ jobs:
         working-directory: /home/azureuser/project-group4/infra/terraform
         run: terraform apply -auto-approve tfplan
 
-
-
-a self-hosted GitHub runner installed on 20.6.132.49
-rsync installed
-
-sudo apt update
-sudo apt install -y rsync
