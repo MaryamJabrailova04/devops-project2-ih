@@ -1,0 +1,91 @@
+name: Terraform Infra
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/infra.yml'
+
+env:
+  TF_IN_AUTOMATION: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  terraform:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Verify Terraform
+        run: terraform version
+
+      - name: Sync Terraform code to existing VM folder
+        shell: bash
+        run: |
+          rsync -av \
+            --exclude '.terraform/' \
+            --exclude '*.tfstate' \
+            --exclude '*.tfstate.*' \
+            "$GITHUB_WORKSPACE/infra/terraform/" \
+            "/home/azureuser/project-group4/infra/terraform/"
+
+      - name: Show Current Workspace
+        shell: bash
+        working-directory: /home/azureuser/project-group4/infra/terraform
+        run: terraform workspace show
+
+      - name: Terraform Init
+        shell: bash
+        working-directory: /home/azureuser/project-group4/infra/terraform
+        run: terraform init
+
+      - name: Terraform Format Check
+        shell: bash
+        working-directory: /home/azureuser/project-group4/infra/terraform
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        shell: bash
+        working-directory: /home/azureuser/project-group4/infra/terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        shell: bash
+        working-directory: /home/azureuser/project-group4/infra/terraform
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -out=tfplan
+          exitcode=$?
+          echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
+          if [ "$exitcode" -eq 1 ]; then
+            echo "Terraform plan failed"
+            exit 1
+          fi
+          exit 0
+
+      - name: Show Plan Result
+        shell: bash
+        run: |
+          if [ "${{ steps.plan.outputs.exitcode }}" = "0" ]; then
+            echo "No infrastructure changes detected."
+          elif [ "${{ steps.plan.outputs.exitcode }}" = "2" ]; then
+            echo "Infrastructure changes detected."
+          fi
+
+      - name: Terraform Apply
+        if: github.event_name == 'workflow_dispatch' && steps.plan.outputs.exitcode == '2'
+        shell: bash
+        working-directory: /home/azureuser/project-group4/infra/terraform
+        run: terraform apply -auto-approve tfplan
+
+
+
+a self-hosted GitHub runner installed on 20.6.132.49
+rsync installed
+
+sudo apt update
+sudo apt install -y rsync
