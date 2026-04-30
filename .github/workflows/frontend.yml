@@ -38,7 +38,7 @@ jobs:
       - name: Build Frontend
         run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL1 }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
       - name: Archive Frontend Build
         run: tar -czf frontend-dist.tar.gz dist
