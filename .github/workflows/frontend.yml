@@ -61,6 +61,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug runner tools
+        run: |
+          echo "HOSTNAME=$(hostname)"
+          echo "USER=$(whoami)"
+          echo "PATH=$PATH"
+          which unzip || true
+          unzip -v || true
+          which curl || true
+          which wget || true
+
+      - name: Install scanner prerequisites
+        run: |
+          sudo apt update
+          sudo apt install -y unzip curl wget
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v7.1.0
         with:
