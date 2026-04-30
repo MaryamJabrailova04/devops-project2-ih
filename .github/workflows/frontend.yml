@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -58,34 +56,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
         with:
-          fetch-depth: 0
+          node-version: '22'
 
-      - name: Debug runner tools
+      - name: Run SonarQube Scan
+        working-directory: frontend
         run: |
-          echo "HOSTNAME=$(hostname)"
-          echo "USER=$(whoami)"
-          echo "PATH=$PATH"
-          which unzip || true
-          unzip -v || true
-          which curl || true
-          which wget || true
-
-      - name: Install scanner prerequisites
-        run: |
-          sudo apt update
-          sudo apt install -y unzip curl wget
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v7.1.0
-        with:
-          projectBaseDir: frontend
-          args: >
-            -Dsonar.projectKey=frontend
-            -Dsonar.sources=src
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          npm ci
+          npx sonar-scanner \
+            -Dsonar.projectKey=frontend \
+            -Dsonar.sources=src \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
   deploy:
     needs: [build-test, sonar-scan]
