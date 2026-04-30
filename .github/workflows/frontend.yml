@@ -38,7 +38,7 @@ jobs:
       - name: Build Frontend
         run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL1 }}
+          VITE_API_BASE_URL1: ${{ secrets.VITE_API_BASE_URL1 }}
 
       - name: Archive Frontend Build
         run: tar -czf frontend-dist.tar.gz dist
@@ -94,5 +94,8 @@ jobs:
       - name: Validate Frontend Direct
         run: curl -I http://10.20.2.4/
 
-      - name: Validate Through App Gateway
-        run: curl -I http://20.205.212.128/
+      - name: Validate API Through HTTPS App Gateway
+        run: curl -I https://group4b-demo-appgw.southeastasia.cloudapp.azure.com/api/ingredients
+
+      - name: Validate Frontend Through HTTPS App Gateway
+        run: curl -I https://group4b-demo-appgw.southeastasia.cloudapp.azure.com/
