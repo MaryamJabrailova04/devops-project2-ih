@@ -94,8 +94,6 @@ jobs:
       - name: Validate Frontend Direct
         run: curl -I http://10.20.2.4/
 
-      - name: Validate API Through HTTPS App Gateway
-        run: curl -I https://group4b-demo-appgw.southeastasia.cloudapp.azure.com/api/ingredients
-
-      - name: Validate Frontend Through HTTPS App Gateway
-        run: curl -I https://group4b-demo-appgw.southeastasia.cloudapp.azure.com/
+      
+      - name: Validate Through App Gateway
+        run: curl -I https://20.205.212.128/
