@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
 
     steps:
       - name: Checkout repository
@@ -41,33 +40,3 @@ jobs:
           name: zap-report-${{ github.run_number }}
           path: report_html.html
           retention-days: 30
-
-      - name: Create GitHub Issue on Vulnerabilities Found
-        if: steps.zap_scan.outcome == 'failure' || steps.zap_scan.outputs.warnings != ''
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const artifactUrl = `${runUrl}#artifacts`;
-
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `[DAST] ZAP Scan found vulnerabilities — Run #${context.runNumber}`,
-              body: [
-                '## OWASP ZAP Baseline Scan — Vulnerabilities Detected',
-                '',
-                `**Branch:** \`${context.ref}\``,
-                `**Commit:** \`${context.sha.slice(0, 7)}\``,
-                `**Run:** [#${context.runNumber}](${runUrl})`,
-                `**Target:** https://group4b-demo-appgw.southeastasia.cloudapp.azure.com`,
-                '',
-                '### Next Steps',
-                '1. Download the HTML report from the [artifacts section](' + artifactUrl + ')',
-                '2. Review flagged alerts and assess severity',
-                '3. Address findings and re-run the scan to verify fixes',
-                '',
-                '_This issue was automatically created by the DAST scanning workflow._',
-              ].join('\n'),
-              labels: ['security', 'dast'],
-            });
