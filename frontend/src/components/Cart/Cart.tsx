@@ -16,11 +16,17 @@ const Cart: React.FC = () => {
   if (cart.length === 0) {
     return (
       <div className="cart-empty">
-        <div className="empty-icon">🛒</div>
+        <div className="empty-icon">
+          <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+        </div>
         <h2>Your cart is empty</h2>
-        <p>Start building your perfect burger!</p>
+        <p>Build a custom pizza to get started</p>
         <button className="build-button" onClick={() => navigate('/')}>
-          Build a Burger
+          Craft a Pizza
         </button>
       </div>
     );
@@ -50,26 +56,26 @@ const Cart: React.FC = () => {
         <div className="cart-summary">
           <div className="summary-card">
             <h2 className="summary-title">Order Summary</h2>
-            
+
             <div className="summary-row">
-              <span className="summary-label">Items:</span>
+              <span className="summary-label">Pizzas</span>
               <span className="summary-value">{cart.length}</span>
             </div>
 
             <div className="summary-row">
-              <span className="summary-label">Subtotal:</span>
+              <span className="summary-label">Subtotal</span>
               <span className="summary-value">${getTotalPrice().toFixed(2)}</span>
             </div>
 
             <div className="summary-row">
-              <span className="summary-label">Tax (10%):</span>
+              <span className="summary-label">Tax (10%)</span>
               <span className="summary-value">${(getTotalPrice() * 0.1).toFixed(2)}</span>
             </div>
 
             <div className="summary-divider"></div>
 
             <div className="summary-row total-row">
-              <span className="summary-label">Total:</span>
+              <span className="summary-label">Total</span>
               <span className="summary-value total">${(getTotalPrice() * 1.1).toFixed(2)}</span>
             </div>
 
@@ -78,7 +84,7 @@ const Cart: React.FC = () => {
             </button>
 
             <button className="continue-shopping" onClick={() => navigate('/')}>
-              Continue Shopping
+              Add Another Pizza
             </button>
           </div>
         </div>
@@ -88,4 +94,3 @@ const Cart: React.FC = () => {
 };
 
 export default Cart;
-

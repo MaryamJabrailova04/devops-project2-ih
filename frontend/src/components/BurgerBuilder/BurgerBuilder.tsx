@@ -32,8 +32,8 @@ const BurgerBuilder: React.FC = () => {
       setLoading(true);
       const data = await getIngredients();
       // Handle both grouped format (legacy) and flat list format (current backend)
-      const allIngredients = Array.isArray(data) 
-        ? data 
+      const allIngredients = Array.isArray(data)
+        ? data
         : [
             ...data.buns,
             ...data.patties,
@@ -43,8 +43,7 @@ const BurgerBuilder: React.FC = () => {
       setIngredients(allIngredients);
       setError(null);
     } catch (err) {
-      setError('Failed to load ingredients. Using sample data for demo.');
-      // Set sample data for demo purposes
+      setError('Could not connect to server. Using sample ingredients for demo.');
       setSampleIngredients();
     } finally {
       setLoading(false);
@@ -73,7 +72,7 @@ const BurgerBuilder: React.FC = () => {
 
   const handleAddToCart = () => {
     if (layers.length === 0) {
-      showNotification('Please add some ingredients first!');
+      showNotification('Add some ingredients to your pizza first.');
       return;
     }
 
@@ -86,7 +85,7 @@ const BurgerBuilder: React.FC = () => {
 
     addItemToCart(cartItem);
     clearLayers();
-    showNotification('Burger added to cart! 🎉');
+    showNotification('Pizza added to your cart!');
   };
 
   const showNotification = (message: string) => {
@@ -97,7 +96,7 @@ const BurgerBuilder: React.FC = () => {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="loading-spinner">🍔</div>
+        <div className="loading-spinner"></div>
         <p>Loading ingredients...</p>
       </div>
     );
@@ -108,18 +107,23 @@ const BurgerBuilder: React.FC = () => {
       {notification && (
         <div className="notification">{notification}</div>
       )}
-      
+
       {error && (
         <div className="error-banner">
-          ⚠️ {error}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          {error}
         </div>
       )}
 
       <div className="builder-container">
         <div className="builder-left">
           <div className="builder-header">
-            <h1>Build Your Burger</h1>
-            <p>Select ingredients to create your perfect burger</p>
+            <h1>Craft Your Pizza</h1>
+            <p>Choose your crust, sauce, and toppings to build the perfect slice</p>
           </div>
           <IngredientList
             ingredients={ingredients}
@@ -133,13 +137,13 @@ const BurgerBuilder: React.FC = () => {
             getIngredientById={getIngredientById}
             onRemoveLayer={removeLayer}
           />
-          
+
           <div className="builder-actions">
             <div className="price-display">
-              <span className="price-label">Total:</span>
+              <span className="price-label">Total</span>
               <span className="price-value">${getTotalPrice().toFixed(2)}</span>
             </div>
-            
+
             <div className="action-buttons">
               <button
                 className="clear-button"
@@ -164,4 +168,3 @@ const BurgerBuilder: React.FC = () => {
 };
 
 export default BurgerBuilder;
-
